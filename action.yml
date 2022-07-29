@@ -1,0 +1,37 @@
+name: 'Build .NET'
+description: 'Build .NET for Umbraco V10'
+inputs:
+  organization-name:
+    required: true
+  project-name:
+    required: true
+  build-configuration:
+    required: true
+    default: 'release'
+  csproj-path:
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Setup . NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    
+    - name: Restore dependencies
+      run: dotnet restore
+      shell: powershell
+      
+    - name: Build
+      run: dotnet build --configuration ${{ inputs.build-configuration }}
+      shell: powershell
+   
+    - name: Publish
+      run: dotnet publish "${{ inputs.csproj-path }}" --output "/Sites/${{ inputs.organization-name }}/${{ inputs.project-name }}/${{ github.ref_name }}" --configuration ${{ inputs.build-configuration }} /p:EnvironmentName=Production --no-restore --no-build
+      shell: powershell
+
+    - name: Create robots.txt (disallow all)
+      run: |
+        New-Item robots.txt -Force
+        Set-Content robots.txt "User-agent: *`r`Disallow: /"
+      shell: powershell
