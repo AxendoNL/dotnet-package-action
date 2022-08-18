@@ -25,3 +25,7 @@ runs:
     - name: Build
       run: dotnet build --configuration ${{ inputs.build-configuration }}
       shell: powershell
+      
+    - name: Publish
+      run: dotnet publish "${{ inputs.csproj-path }}" --output "${{ github.workspace }}/Archive/${{ inputs.organization-name }}/${{ inputs.project-name }}/${{ github.ref_name }}" --configuration ${{ inputs.build-configuration }} /p:EnvironmentName=Production --no-restore --no-build
+      shell: powershell
