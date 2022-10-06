@@ -13,19 +13,28 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup . NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 6.0.x
-    
-    - name: Restore dependencies
-      run: dotnet restore
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name : Setup Nuget
+      uses: nuget/setup-nuget@v1.0.6
+
+    - name: Restore nuget packages
+      run: nuget restore ${{ inputs.csproj-path }}
       shell: powershell
-      
-    - name: Build
-      run: dotnet build --configuration ${{ inputs.build-configuration }}
+
+    - name: Transform web.config
+      run: |
+        $webFolderExists = Test-Path .\*.web\
+        if($webFolderExists){ cd .\*.web\ } else { cd .\*.site\ }
+        $webBambooConfigExists = Test-Path web.live.config
+        if($webBambooConfigExists) {c:\.\DeploymentScripts\ConfigTransformationTool\ctt.exe s:web.config t:web.bamboo.config d:web.config pw}
       shell: powershell
-      
-    - name: Publish
-      run: dotnet publish "${{ inputs.csproj-path }}" --output "${{ github.workspace }}/Archive/${{ inputs.organization-name }}/${{ inputs.project-name }}/${{ github.ref_name }}" --configuration ${{ inputs.build-configuration }} /p:EnvironmentName=Production --no-restore --no-build
+
+    - name: Copy files to sites folder
+      run: |
+        md -Force "${{ github.workspace }}/Archive/${{ inputs.organization-name }}/${{ inputs.project-name }}/${{ github.ref_name }}"
+         $webFolderExists = Test-Path .\*.web\
+         if($webFolderExists){Copy-Item .\*.Web\* "${{ github.workspace }}/Archive/${{ inputs.organization-name }}/${{ inputs.project-name }}/${{ github.ref_name }}" -force -recurse}
+         if(-not $webFolderExists){Copy-Item .\*.Site\* "${{ github.workspace }}/Archive/${{ inputs.organization-name }}/${{ inputs.project-name }}/${{ github.ref_name }}" -force -recurse}
       shell: powershell
