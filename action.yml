@@ -19,8 +19,12 @@ runs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
 
+    - name: Add GitHub PAT to nuget.config
+      run: (Get-Content -path .\NuGet.config -Raw) -replace '{PAT}','${{ inputs.token }}' | Set-Content -Path .\NuGet.config
+      shell: powershell
+
     - name : Setup Nuget
-      uses: nuget/setup-nuget@v1.0.6
+      uses: nuget/setup-nuget@v1.1.1
 
     - name: Restore nuget packages
       run: nuget restore ${{ inputs.csproj-path }}
