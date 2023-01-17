@@ -10,6 +10,9 @@ inputs:
     default: 'release'
   csproj-path:
     required: true
+  token:
+    description: 'A Github PAT'
+    required: true
 runs:
   using: "composite"
   steps:
