@@ -1,5 +1,5 @@
 name: 'Build .NET'
-description: 'Build .NET for Umbraco V10'
+description: 'Build .NET for Umbraco V12'
 inputs:
   organization-name:
     required: true
@@ -17,9 +17,9 @@ runs:
   using: "composite"
   steps:
     - name: Setup . NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v3.0.3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.0.x
     
     - name: Add GitHub PAT to nuget.config
       run: (Get-Content -path .\NuGet.config -Raw) -replace '{PAT}','${{ inputs.token }}' | Set-Content -Path .\NuGet.config
